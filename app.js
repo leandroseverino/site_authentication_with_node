@@ -7,6 +7,9 @@ const expressHandlebars = require('express-handlebars');
 const flash = require('connect-flash');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const passport = require('passport');
+
+require('./config/passport');
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://admin:admin01@ds123834.mlab.com:23834/site_authentication', { useNewUrlParser: true })
@@ -29,6 +32,11 @@ app.use(session({
   saveUninitialized: false,
   resave: false
 }));
+
+// Passport use
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use(flash());
 
