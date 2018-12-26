@@ -28,9 +28,20 @@ router.route('/register')
         req.flash('error', 'Email alredy in use !.');
         res.redirect('/users/register');
         return;
-      } else {
-        
-      }
+      } 
+
+      const hash = await User.hashPassword(result.value.password);
+      
+      delete result.value.confirmationPassword;
+      result.value.password = hash;
+      
+      const newUser = await new User(result.value);
+      console.log('newUser', newUser);
+
+      await newUser.save();
+      req.flash('success', 'You may now login !.');
+      res.redirect('/users/login');
+
     } catch (error) {
       next(error);
     }

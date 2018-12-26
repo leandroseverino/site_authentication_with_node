@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const mongoose = require('mongoose');
 
+mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://admin:admin01@ds123834.mlab.com:23834/site_authentication', { useNewUrlParser: true })
 
 const app = express();
