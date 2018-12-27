@@ -8,7 +8,7 @@ Make sure you have [Node.js](http://nodejs.org/) installed.
 
 ```sh
 git clone git@github.com:leandroseverino/site_authentication_with_node.git # or clone your own fork
-cd apiproject
+cd site_authentication_with_node
 npm install # or yarn install
 npm start   # or yarn start
 ```
