@@ -1,13 +1,13 @@
 {
-  "name": "CodeWorkrAuthentication",
+  "name": "site_authentication_with_node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "CodeWorkr",
+  "author": "Leandro Severino - Professor Leandro",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -21,7 +21,9 @@
     "joi": "^14.3.0",
     "mongoose": "^5.4.1",
     "morgan": "^1.8.1",
+    "nodemailer": "^4.7.0",
     "passport": "^0.4.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "randomstring": "^1.1.5"
   }
 }

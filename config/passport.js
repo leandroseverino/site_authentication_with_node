@@ -21,16 +21,23 @@ passport.use('local', new LocalStrategy({
     passReqToCallback: false
 }, async (email, password, done) => {
     try {
+        // Check if user exists with this email.
         const user = await User.findOne({ 'email': email});
         if (!user) {
             return done(null, false, { message: 'Unknown User'});
         }
+        // Check if the password is valid.
         const isValid = await User.comparePasswords(password, user.password);
-
         if (! isValid) {
             return done(null, false, { message: 'Invalid Password'});            
         } 
+        // Check if user is active (Confirmed by email link first).
+        if (!user.active) {
+            return done(null, false, { message: 'You need to verify email first !'});            
+        }
+
         return done(null, user);
+
     } catch (error) {
         done(error, false, { message: 'Failed to check the User !. Check the database connectivity !'});
     }

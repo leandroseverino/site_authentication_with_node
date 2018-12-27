@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
 const passport = require('passport');
+const randomstring = require('randomstring');
 
+const mailer = require('../misc/mailer');
 const User = require('../models/user');
 
 const userSchema = Joi.object().keys({
@@ -42,6 +44,7 @@ router.route('/register')
         res.redirect('/users/register');
         return;
       }
+
       const user = await User.findOne({ 'email': result.value.email });  
       if (user) {
         req.flash('error', 'Email alredy in use !.');
@@ -51,14 +54,34 @@ router.route('/register')
 
       const hash = await User.hashPassword(result.value.password);
       
+      const secretToken = randomstring.generate();
+      result.value.secretToken = secretToken;
+      result.value.active = false;
+
       delete result.value.confirmationPassword;
       result.value.password = hash;
       
       const newUser = await new User(result.value);
-      console.log('newUser', newUser);
 
       await newUser.save();
-      req.flash('success', 'You may now login !.');
+
+      const html = `Hi there !,
+      <br />
+      Thank you for registering !
+      <br />
+      <br />
+      Please verify your email by typing the following token: 
+      <br />
+      Token: <strong>${secretToken}</strong>
+      <br />
+      On the following page:
+      <a href="http://localhost:5000/users/verify">http://localhost:5000/users/verify</a>
+      <br />
+      Have a pleasant day !`;
+
+      await mailer.sendEmail('register@siteauthenticationwithnode.com', newUser.email, 'Register confirmation !', html);
+
+      req.flash('success', 'Please ! Check your email to complete the registration !');
       res.redirect('/users/login');
 
     } catch (error) {
@@ -66,6 +89,30 @@ router.route('/register')
     }
     
   });
+
+router.route('/verify')
+.get(isNotAuthenticated, (req, res) => {
+  res.render('verify');
+})
+.post(async (req, res, next) => {
+  try {
+    const { secretToken } = req.body;
+    const user = await User.findOne({ 'secretToken': secretToken.trim() });  
+    if (!user) {
+      req.flash('error', 'Invalid Token !');
+      res.redirect('/users/verify');
+      return;
+    } else {
+      user.active = true;
+      user.secretToken = '';
+      await user.save();
+      req.flash('success', 'You account is verified successfully !. Now, you may login !.');
+      res.redirect('/users/login');
+    }  
+  } catch (error) {
+    next(error);
+  }  
+});
 
 router.route('/login')
   .get(isNotAuthenticated, (req, res) => {
