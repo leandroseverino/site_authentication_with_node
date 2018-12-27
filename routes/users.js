@@ -12,8 +12,26 @@ const userSchema = Joi.object().keys({
   confirmationPassword: Joi.any().valid(Joi.ref('password')).required()
 });
 
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  req.flash('error', 'You must be registered first !');
+  res.redirect('/');
+};
+
+const isNotAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    req.flash('error', 'Sorry, but you are already logged in !');
+    res.redirect('/');  
+  } else {
+    return next();
+  }
+};
+
+
 router.route('/register')
-  .get((req, res) => {
+  .get(isNotAuthenticated, (req, res) => {
     res.render('register');
   })
   .post(async (req, res, next) => {
@@ -50,7 +68,7 @@ router.route('/register')
   });
 
 router.route('/login')
-  .get((req, res) => {
+  .get(isNotAuthenticated, (req, res) => {
     res.render('login');
   })
   .post(passport.authenticate('local', {
@@ -59,9 +77,18 @@ router.route('/login')
     failureFlash: true
   }));
 
+router.route('/logout')
+  .get(isAuthenticated, (req, res, next) => {
+    req.logout();
+    req.flash('success', 'Successfully logged out. Hope to see you soon !.');
+    res.redirect('/');
+  });
+
 router.route('/dashboard')
-  .get((req, res) => {
-    res.render('dashboard');
+  .get(isAuthenticated, (req, res) => {
+    res.render('dashboard', {
+      username: req.user.username
+    });
   });
 
   module.exports = router;
